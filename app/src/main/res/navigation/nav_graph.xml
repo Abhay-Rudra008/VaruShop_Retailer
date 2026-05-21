@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="utf-8"?>
+<navigation xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/nav_graph.xml"
+    app:startDestination="@id/nav_home">
+
+    <fragment
+        android:id="@+id/nav_home"
+        android:name="com.example.varushopretailer.fragments.HomeFragment"
+        android:label="@string/nav_home"
+        tools:layout="@layout/fragment_home" />
+
+    <fragment
+        android:id="@+id/nav_wallets"
+        android:name="com.example.varushopretailer.fragments.WalletFragment"
+        android:label="@string/wallet"
+        tools:layout="@layout/fragment_wallet" />
+    <fragment
+        android:id="@+id/nav_orders"
+        android:name="com.example.varushopretailer.fragments.OrdersFragment"
+        android:label="@string/nav_orders"
+        tools:layout="@layout/fragment_orders" />
+    <fragment
+        android:id="@+id/nav_products"
+        android:name="com.example.varushopretailer.fragments.ManageProductsFragment"
+        android:label="@string/nav_manage"
+        tools:layout="@layout/fragment_manage_products" />
+
+    <fragment
+        android:id="@+id/nav_stats"
+        android:name="com.example.varushopretailer.fragments.StatsFragment"
+        android:label="@string/nav_stats"
+        tools:layout="@layout/fragment_stats" />
+
+</navigation>

@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="black">#FF000000</color>
+    <color name="white">#FFFFFFFF</color>
+    <color name="your_primary_brand_color">#4F38FF</color>
+    <color name="brand_primary">#4F38FF</color>
+    <color name="background_surface">#F8F9FA</color>
+    <color name="text_main">#2D3436</color>
+    <color name="text_secondary">#636E72</color>
+    <color name="edit_text_bg">#FFFFFF</color>
+    <color name="yellow_100">#FFF9C4</color>
+    <color name="yellow_800">#FBC02D</color>
+    <color name="blue_100">#BBDEFB</color>
+    <color name="blue_800">#1976D2</color>
+    <color name="green_100">#C8E6C9</color>
+    <color name="green_800">#2E7D32</color>
+    <color name="red_100">#FFCDD2</color>
+    <color name="red_800">#C62828</color>
+    <color name="gray_100">#E0E0E0</color>
+    <color name="gray_800">#616161</color>
+    <color name="gray">#6B7280</color>
+    <color name="gray_light">#9CA3AF</color>
+    <color name="card_stroke">#1A000000</color>
+    <color name="error_red">#D32F2F</color>
+    <color name="window_background_light">#F8F9FA</color>
+    <color name="surface_light">#FFFFFF</color>
+    <color name="status_red_bg">#FFCDD2</color>
+    <color name="status_red_text">#B71C1C</color>
+    <color name="status_orange_bg">#FFE0B2</color>
+    <color name="status_green_bg">#C8E6C9</color>
+    <color name="status_green_text">#1B5E20</color>
+    <color name="status_orange_text">#E65100</color>
+</resources>

@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shape xmlns:android="http://schemas.android.com/apk/res/android"
+    android:shape="rectangle">
+    <!-- 10% opacity black for a subtle background -->
+    <solid android:color="#1A000000" />
+    <corners android:radius="12dp" />
+    <!-- Adds breathing room around the text -->
+    <padding
+        android:left="8dp"
+        android:top="4dp"
+        android:right="8dp"
+        android:bottom="4dp" />
+</shape>

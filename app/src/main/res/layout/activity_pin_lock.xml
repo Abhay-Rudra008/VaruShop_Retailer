@@ -1,0 +1,141 @@
+<?xml version="1.0" encoding="utf-8"?>
+<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:id="@+id/main"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="?android:attr/windowBackground"
+    android:padding="24dp"
+    tools:context=".activity.PinLockActivity">
+
+    <ImageView
+        android:id="@+id/imgLockIcon"
+        android:layout_width="64dp"
+        android:layout_height="64dp"
+        android:layout_marginTop="60dp"
+        android:contentDescription="@string/lock"
+        android:src="@drawable/ic_lock"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toTopOf="parent"
+        app:tint="?attr/colorPrimary" />
+
+    <TextView
+        android:id="@+id/txtPinTitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="24dp"
+        android:text="@string/verify_identity"
+        android:textColor="?attr/colorOnSurface"
+        android:textSize="22sp"
+        android:textStyle="bold"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/imgLockIcon" />
+
+    <TextView
+        android:id="@+id/txtPinSubtitle"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="8dp"
+        android:text="@string/enter_your_4_digit_pin_to_continue"
+        android:textColor="?android:attr/textColorSecondary"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtPinTitle" />
+
+    <LinearLayout
+        android:id="@+id/layoutDots"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="40dp"
+        android:orientation="horizontal"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@id/txtPinSubtitle">
+
+        <View
+            android:id="@+id/dot1"
+            style="@style/PinDotStyle" />
+
+        <View
+            android:id="@+id/dot2"
+            style="@style/PinDotStyle" />
+
+        <View
+            android:id="@+id/dot3"
+            style="@style/PinDotStyle" />
+
+        <View
+            android:id="@+id/dot4"
+            style="@style/PinDotStyle" />
+    </LinearLayout>
+
+    <androidx.gridlayout.widget.GridLayout
+        android:id="@+id/keypadGrid"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginBottom="40dp"
+        app:columnCount="3"
+        app:layout_constraintBottom_toBottomOf="parent"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent">
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_1" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_2" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_3" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_4" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_5" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_6" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_7" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_8" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_9" />
+
+        <ImageButton
+            android:id="@+id/btnBiometric"
+            style="@style/KeypadButtonStyle"
+            android:src="@drawable/ic_fingerprint"
+            android:contentDescription="@string/fingerprint"
+            app:tint="?attr/colorPrimary" />
+
+        <Button
+            style="@style/KeypadButtonStyle"
+            android:text="@string/_0" />
+
+        <ImageButton
+            android:id="@+id/btnDelete"
+            style="@style/KeypadButtonStyle"
+            android:src="@drawable/ic_backspace"
+            android:contentDescription="@string/close"
+            app:tint="?attr/colorError" />
+
+    </androidx.gridlayout.widget.GridLayout>
+
+</androidx.constraintlayout.widget.ConstraintLayout>

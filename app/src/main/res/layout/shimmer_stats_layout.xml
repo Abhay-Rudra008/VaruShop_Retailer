@@ -1,0 +1,108 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="20dp">
+
+    <View
+        android:layout_width="180dp"
+        android:layout_height="28dp"
+        android:background="@drawable/bg_shimmer_bone" />
+
+    <View
+        android:layout_width="220dp"
+        android:layout_height="16dp"
+        android:layout_marginTop="8dp"
+        android:layout_marginBottom="24dp"
+        android:background="@drawable/bg_shimmer_bone" />
+
+    <androidx.cardview.widget.CardView
+        android:layout_width="match_parent"
+        android:layout_height="260dp"
+        android:layout_marginBottom="24dp"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="0dp">
+
+        <RelativeLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:padding="24dp">
+
+            <View
+                android:id="@+id/boneRevenueTitle"
+                android:layout_width="100dp"
+                android:layout_height="16dp"
+                android:background="@drawable/bg_shimmer_bone" />
+
+            <View
+                android:id="@+id/boneTotalRevenue"
+                android:layout_width="160dp"
+                android:layout_height="40dp"
+                android:layout_below="@id/boneRevenueTitle"
+                android:layout_marginTop="8dp"
+                android:background="@drawable/bg_shimmer_bone" />
+
+            <View
+                android:id="@+id/boneGrowthPill"
+                android:layout_width="60dp"
+                android:layout_height="20dp"
+                android:layout_below="@id/boneTotalRevenue"
+                android:layout_marginTop="12dp"
+                android:background="@drawable/bg_shimmer_bone" />
+
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="100dp"
+                android:layout_alignParentBottom="true"
+                android:background="@drawable/bg_shimmer_bone" />
+        </RelativeLayout>
+    </androidx.cardview.widget.CardView>
+
+    <GridLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:alignmentMode="alignMargins"
+        android:columnCount="2">
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_marginEnd="8dp"
+            android:background="@drawable/bg_shimmer_bone" />
+
+        <View
+            android:layout_width="0dp"
+            android:layout_height="100dp"
+            android:layout_columnWeight="1"
+            android:layout_marginStart="8dp"
+            android:background="@drawable/bg_shimmer_bone" />
+    </GridLayout>
+
+    <View
+        android:layout_width="160dp"
+        android:layout_height="20dp"
+        android:layout_marginTop="32dp"
+        android:layout_marginBottom="16dp"
+        android:background="@drawable/bg_shimmer_bone" />
+
+    <include
+        layout="@layout/shimmer_placeholder_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content" />
+
+    <include
+        layout="@layout/shimmer_placeholder_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" />
+
+    <include
+        layout="@layout/shimmer_placeholder_item"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>
