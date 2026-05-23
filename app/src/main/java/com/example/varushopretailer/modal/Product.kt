@@ -19,6 +19,7 @@ data class Product(
     @SerializedName("created_at") val createdAt: String,
     @SerializedName("primary_image") val primaryImage: String?,
     @SerializedName("images") val images: List<String>? = emptyList(),
+    @SerializedName("deleted_at") val deletedAt: String?,
 ) : Parcelable {
 
     val firstImageUrl: String?
@@ -29,7 +30,7 @@ data class Product(
 
     val finalPrice: Double
         get() = if (discountValue > 0) priceValue * (1 - (discountValue / 100)) else priceValue
-
+    val isAdminDeleted: Boolean get() = deletedAt != null
     val isLowStock: Boolean get() = stock in 1..9
     val isOutOfStock: Boolean get() = stock <= 0
 }

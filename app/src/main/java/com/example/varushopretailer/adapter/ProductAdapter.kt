@@ -5,40 +5,63 @@ import android.graphics.Paint
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.ContextCompat
 import androidx.recyclerview.widget.DiffUtil
+import androidx.recyclerview.widget.ListAdapter
 import androidx.recyclerview.widget.RecyclerView
-import com.example.varushopretailer.R
-import com.example.varushopretailer.databinding.ItemProductManageBinding
-import com.example.varushopretailer.modal.Product
 import com.bumptech.glide.Glide
 import com.bumptech.glide.load.resource.bitmap.CenterCrop
 import com.bumptech.glide.load.resource.bitmap.RoundedCorners
 import com.bumptech.glide.load.resource.drawable.DrawableTransitionOptions
-import androidx.core.content.ContextCompat
-import androidx.recyclerview.widget.ListAdapter
-
+import com.example.varushopretailer.R
+import com.example.varushopretailer.databinding.ItemProductManageBinding
+import com.example.varushopretailer.modal.Product
 
 
 class ProductAdapter(
     private val isEditable: Boolean = true,
-    private val onItemClick: (Product) -> Unit
+    private val showActions: Boolean = true,
+    private val onItemClick: (Product) -> Unit = {},
+    private val onEmailClick: (Product) -> Unit = {},
+    private val onDeleteClick: (Product) -> Unit = {}
 ) : ListAdapter<Product, ProductAdapter.ProductViewHolder>(ProductDiffCallback()) {
 
     inner class ProductViewHolder(private val binding: ItemProductManageBinding) :
         RecyclerView.ViewHolder(binding.root) {
 
         init {
+            // 1. Root Click (Disabled if Admin Deleted)
             binding.root.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    val product = getItem(position)
+                    if (!product.isAdminDeleted) {
+                        onItemClick(product)
+                    }
+                }
+            }
+
+            // 2. Edit Click
+            binding.btnEditProduct.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
                     onItemClick(getItem(position))
                 }
             }
 
-            binding.btnEditProduct.setOnClickListener {
+            // 3. Email Admin Click
+            binding.btnEmailAdmin.setOnClickListener {
                 val position = bindingAdapterPosition
                 if (position != RecyclerView.NO_POSITION) {
-                    onItemClick(getItem(position))
+                    onEmailClick(getItem(position))
+                }
+            }
+
+            // 4. Delete Click (Always accessible)
+            binding.btnDeleteProduct.setOnClickListener {
+                val position = bindingAdapterPosition
+                if (position != RecyclerView.NO_POSITION) {
+                    onDeleteClick(getItem(position))
                 }
             }
         }
@@ -48,15 +71,35 @@ class ProductAdapter(
             Glide.with(binding.ivProduct.context)
                 .load(product.firstImageUrl)
                 .placeholder(R.color.edit_text_bg)
-                 .error(R.drawable.app_logo)
+                .error(R.drawable.app_logo)
                 .transition(DrawableTransitionOptions.withCrossFade())
                 .transform(CenterCrop(), RoundedCorners(24))
                 .into(binding.ivProduct)
 
             binding.tvProductName.text = product.name ?: "Unnamed Product"
-            binding.btnEditProduct.visibility = if (isEditable) View.VISIBLE else View.GONE
 
-            val originalPrice = product.price?.toDoubleOrNull() ?: 0.0
+            if (!showActions) {
+                // READ-ONLY MODE (For StatsFragment)
+                binding.root.alpha = 1.0f
+                binding.btnEditProduct.visibility = View.GONE
+                binding.btnEmailAdmin.visibility = View.GONE
+                binding.btnDeleteProduct.visibility = View.GONE
+            } else {
+                // MANAGE MODE (For ManageProductsFragment)
+                if (product.isAdminDeleted) {
+                    binding.root.alpha = 0.5f
+                    binding.btnEditProduct.visibility = View.GONE
+                    binding.btnEmailAdmin.visibility = View.VISIBLE
+                } else {
+                    binding.root.alpha = 1.0f
+                    binding.btnEditProduct.visibility = if (isEditable) View.VISIBLE else View.GONE
+                    binding.btnEmailAdmin.visibility = View.GONE
+                }
+                binding.btnDeleteProduct.visibility = View.VISIBLE
+            }
+
+            // --- PRICE LOGIC ---
+            val originalPrice = product.price.toDoubleOrNull() ?: 0.0
             val discPercent = product.discount?.toDoubleOrNull() ?: 0.0
 
             if (discPercent > 0) {
@@ -73,9 +116,8 @@ class ProductAdapter(
                 binding.tvOldPrice.visibility = View.GONE
             }
 
+            // --- STOCK LOGIC ---
             updateStockUI(product)
-
-
         }
 
         private fun updateStockUI(product: Product) {
@@ -88,6 +130,7 @@ class ProductAdapter(
                         context.getString(R.string.out_of_stock)
                     )
                 }
+
                 product.isLowStock -> {
                     Triple(
                         R.color.status_orange_text,
@@ -95,6 +138,7 @@ class ProductAdapter(
                         "${context.getString(R.string.low_stock)}: ${product.stock}"
                     )
                 }
+
                 else -> {
                     Triple(
                         R.color.status_green_text,

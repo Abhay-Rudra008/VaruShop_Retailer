@@ -16,6 +16,7 @@ import com.example.varushopretailer.modal.wallet.PayoutData
 import com.example.varushopretailer.modal.wallet.WithdrawRequest
 import okhttp3.MultipartBody
 import okhttp3.RequestBody
+import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.DELETE
 import retrofit2.http.GET
@@ -103,39 +104,41 @@ interface RetailerApiService {
     @GET("retailer/categories")
     suspend fun getCategories(): ApiResponse<List<Category>>
 
-    @DELETE("retailer/products/delete/{id}")
-    suspend fun deleteProduct(
+
+    @GET("retailer/products/{id}/images")
+    suspend fun getProductImages(
         @Path("id") productId: Int
-    ): ApiResponse<Unit>
+    ): Response<ApiResponse<List<String>>>
+
+    @Multipart
+    @POST("retailer/products/upload")
+    suspend fun uploadProduct(
+        @Part("name") name: RequestBody,
+        @Part("description") description: RequestBody?,
+        @Part("price") price: RequestBody,
+        @Part("stock") stock: RequestBody,
+        @Part("category_id") categoryId: RequestBody,
+        @Part("discount_percent") discount: RequestBody?,
+        @Part images: List<MultipartBody.Part>
+    ): Response<ApiResponse<String>>
 
     @Multipart
     @PUT("retailer/products/{id}")
     suspend fun updateProduct(
         @Path("id") id: Int,
         @Part("name") name: RequestBody,
-        @Part("description") description: RequestBody,
+        @Part("description") description: RequestBody?,
         @Part("price") price: RequestBody,
         @Part("stock") stock: RequestBody,
         @Part("category_id") categoryId: RequestBody,
-        @Part("discount") discount: RequestBody,
-        @Part("deletedImageIds") deletedImageIds: RequestBody,
+        @Part("discount_percent") discount: RequestBody?,
+        @Part("deletedImageUrls") deletedImageUrls: RequestBody?,
         @Part images: List<MultipartBody.Part>?
-    ): ApiResponse<Unit>
-
-    @Multipart
-    @POST("retailer/products")
-    suspend fun uploadProduct(
-        @Part("name") name: RequestBody,
-        @Part("description") description: RequestBody,
-        @Part("price") price: RequestBody,
-        @Part("stock") stock: RequestBody,
-        @Part("category_id") categoryId: RequestBody,
-        @Part("discount") discount: RequestBody,
-        @Part images: List<MultipartBody.Part>
-    ): ApiResponse<Unit>
+    ): Response<ApiResponse<String>>
 
     @PUT("retailer/orders/{id}/status")
     suspend fun updateOrderStatus(
+
         @Path("id") orderId: Int, @Body statusMap: Map<String, String>
     ): ApiResponse<Unit>
 
@@ -147,5 +150,9 @@ interface RetailerApiService {
         @Body request: WithdrawRequest
     ): ApiResponse<Unit>
 
+    @DELETE("retailer/products/delete/{id}")git init
+    suspend fun deleteProduct(
+        @Path("id") productId: Int
+    ): ApiResponse<Unit>
 
 }

@@ -50,7 +50,10 @@ class StatsFragment : Fragment(R.layout.fragment_stats) {
     }
 
     private fun setupRecyclerView() {
-        productAdapter = ProductAdapter(isEditable = false) { product ->
+        productAdapter = ProductAdapter(
+            isEditable = false,
+            showActions = false
+        ) { product ->
             Toast.makeText(requireContext(), "${product.name} selected", Toast.LENGTH_SHORT).show()
         }
 

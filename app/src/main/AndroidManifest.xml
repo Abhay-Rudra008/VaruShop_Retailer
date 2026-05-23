@@ -18,6 +18,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.VaruShopRetailer">
         <activity
+            android:name=".activity.NotificationActivity"
+            android:exported="false" />
+        <activity
             android:name=".activity.AnalyticsActivity"
             android:exported="false" />
         <activity

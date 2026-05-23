@@ -1,8 +1,10 @@
 package com.example.varushopretailer.stats
 
 
+import com.example.varushopretailer.modal.ApiResponse
 import com.example.varushopretailer.modal.wallet.WithdrawRequest
 import com.example.varushopretailer.viewmodal.BaseRepository
+import com.google.gson.Gson
 import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
@@ -24,10 +26,7 @@ class RetailerRepository @Inject constructor(
     }
 
     suspend fun registerRetailer(
-        name: String,
-        email: String,
-        pass: String,
-        imageFile: File?
+        name: String, email: String, pass: String, imageFile: File?
     ) = safeApiCall {
 
         val nameBody = name.toRequestBody("text/plain".toMediaTypeOrNull())
@@ -83,57 +82,6 @@ class RetailerRepository @Inject constructor(
         apiService.requestWithdrawal(request)
     }
 
-    suspend fun updateProduct(
-        productId: Int,
-        name: String,
-        desc: String,
-        price: String,
-        stock: String,
-        catId: Int,
-        files: List<File>,
-        discount: String = "0",
-        deletedImageIds: List<Int> = emptyList()
-    ) = safeApiCall {
-        val imageParts = files.map { file ->
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            MultipartBody.Part.createFormData("images", file.name, requestFile)
-        }
-
-        val deletedIdsJson = "[${deletedImageIds.joinToString(",")}]"
-
-        apiService.updateProduct(
-            id = productId,
-            name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
-            description = desc.toRequestBody("text/plain".toMediaTypeOrNull()),
-            price = price.toRequestBody("text/plain".toMediaTypeOrNull()),
-            stock = stock.toRequestBody("text/plain".toMediaTypeOrNull()),
-            categoryId = catId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-            discount = discount.toRequestBody("text/plain".toMediaTypeOrNull()),
-            deletedImageIds = deletedIdsJson.toRequestBody("text/plain".toMediaTypeOrNull()),
-            images = imageParts.ifEmpty { null }
-        )
-    }
-
-    suspend fun uploadProductWithImages(
-        name: String, desc: String, price: String,
-        stock: String, catId: Int, discount: String, files: List<File>
-    ) = safeApiCall {
-        val imageParts = files.map { file ->
-            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
-            MultipartBody.Part.createFormData("images", file.name, requestFile)
-        }
-
-        apiService.uploadProduct(
-            name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
-            description = desc.toRequestBody("text/plain".toMediaTypeOrNull()),
-            price = price.toRequestBody("text/plain".toMediaTypeOrNull()),
-            stock = stock.toRequestBody("text/plain".toMediaTypeOrNull()),
-            categoryId = catId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
-            discount = discount.toRequestBody("text/plain".toMediaTypeOrNull()),
-            images = imageParts
-        )
-    }
-
 
     suspend fun getRecentOrders() = safeApiCall {
         apiService.getRecentOrders()
@@ -154,5 +102,85 @@ class RetailerRepository @Inject constructor(
 
 
         apiService.updateOrderStatus(orderId, body)
+    }
+
+    suspend fun getProductImages(productId: Int): Resource<ApiResponse<List<String>>> {
+        return try {
+            val response = apiService.getProductImages(productId)
+
+            if (response.isSuccessful) {
+                val body = response.body()
+                if (body != null) {
+                    // Successfully un-wrapped the body!
+                    Resource.Success(body)
+                } else {
+                    Resource.Error("Response body is empty")
+                }
+            } else {
+                // Here, response.message() is a Retrofit function
+                Resource.Error(response.message())
+            }
+        } catch (e: Exception) {
+            // Catches network errors, timeouts, etc.
+            Resource.Error(e.localizedMessage ?: "An unknown error occurred")
+        }
+    }
+
+    suspend fun uploadProductWithImages(
+        name: String,
+        desc: String,
+        price: String,
+        stock: String,
+        catId: Int,
+        discount: String,
+        files: List<File>
+    ) = safeApiCall {
+        val imageParts = files.map { file ->
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("images", file.name, requestFile)
+        }
+
+        apiService.uploadProduct(
+            name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
+            description = desc.toRequestBody("text/plain".toMediaTypeOrNull()),
+            price = price.toRequestBody("text/plain".toMediaTypeOrNull()),
+            stock = stock.toRequestBody("text/plain".toMediaTypeOrNull()),
+            categoryId = catId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+            discount = discount.toRequestBody("text/plain".toMediaTypeOrNull()),
+            images = imageParts
+        )
+    }
+
+    suspend fun updateProduct(
+        productId: Int,
+        name: String,
+        desc: String,
+        price: String,
+        stock: String,
+        catId: Int,
+        files: List<File>,
+        deletedUrls: List<String>,
+        discount: String = "0"
+    ) = safeApiCall {
+        val imageParts = files.map { file ->
+            val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
+            MultipartBody.Part.createFormData("images", file.name, requestFile)
+        }
+
+        val deletedUrlsJson = Gson().toJson(deletedUrls)
+
+        apiService.updateProduct(
+            id = productId,
+            name = name.toRequestBody("text/plain".toMediaTypeOrNull()),
+            description = desc.toRequestBody("text/plain".toMediaTypeOrNull()),
+            price = price.toRequestBody("text/plain".toMediaTypeOrNull()),
+            stock = stock.toRequestBody("text/plain".toMediaTypeOrNull()),
+            categoryId = catId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
+            discount = discount.toRequestBody("text/plain".toMediaTypeOrNull()),
+            deletedImageUrls = deletedUrlsJson.toRequestBody("application/json".toMediaTypeOrNull()),
+            images = imageParts.ifEmpty { null })
+    }
+    suspend fun deleteProduct(productId: Int) = safeApiCall {
+        apiService.deleteProduct(productId)
     }
 }

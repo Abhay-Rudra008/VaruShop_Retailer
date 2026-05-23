@@ -24,6 +24,8 @@ class UploadProductActivity : BaseActivity() {
 
     private lateinit var binding: ActivityUploadProductBinding
     private val selectedImages = mutableListOf<Uri>()
+    private val deletedExistingUrls = mutableListOf<String>() // Tracker for deleted images
+
     private lateinit var imageAdapter: ImagePickerAdapter
     private var categoryList: List<Category> = emptyList()
     private var selectedCategoryId: Int = -1
@@ -44,23 +46,44 @@ class UploadProductActivity : BaseActivity() {
         observeViewModel()
 
         viewModel.fetchCategories()
-        existingProduct?.let { preFillData(it) }
+
+        existingProduct?.let { product ->
+            preFillBasicData(product)
+            viewModel.fetchProductImages(product.id) // Fetch full images in background
+        }
     }
 
     @SuppressLint("SetTextI18n")
-    private fun preFillData(product: Product) {
+    private fun preFillBasicData(product: Product) {
         binding.toolbar.title = "Update Product"
         binding.btnUpload.text = "Update Product"
 
         binding.etProductName.setText(product.name)
         binding.etProductDesc.setText(product.description)
-        binding.etPrice.setText(product.price.toString())
+        binding.etPrice.setText(product.price)
         binding.etStock.setText(product.stock.toString())
-        selectedCategoryId = product.categoryId
 
-        product.images?.forEach { url ->
-            selectedImages.add(url.toUri())
+        // Load the discount percent
+        binding.etDiscount.setText(product.discount?.toString() ?: "0")
+
+        selectedCategoryId = product.categoryId
+    }
+
+    private fun loadImagesIntoAdapter(imagesList: List<String>) {
+        selectedImages.clear()
+
+        fun getCloudinaryUrl(imageString: String): String {
+            return if (imageString.startsWith("http")) {
+                imageString.replace("http://", "https://")
+            } else {
+                "https://res.cloudinary.com/YOUR_CLOUD_NAME/image/upload/$imageString" // Change this!
+            }
         }
+
+        imagesList.forEach { img ->
+            selectedImages.add(getCloudinaryUrl(img).toUri())
+        }
+
         imageAdapter.submitList(ArrayList(selectedImages))
     }
 
@@ -74,6 +97,13 @@ class UploadProductActivity : BaseActivity() {
             existingProduct?.let { prod ->
                 val catName = categories.find { it.id == prod.categoryId }?.name
                 binding.autoCompleteCategory.setText(catName, false)
+            }
+        }
+
+        // Listen for the background images to load
+        viewModel.productImages.observe(this) { imagesList ->
+            if (imagesList.isNotEmpty()) {
+                loadImagesIntoAdapter(imagesList)
             }
         }
 
@@ -117,27 +147,29 @@ class UploadProductActivity : BaseActivity() {
                 else -> {
                     if (existingProduct != null) {
                         viewModel.updateProduct(
-                            token,
-                            existingProduct!!.id,
-                            name,
-                            desc,
-                            price,
-                            stock,
-                            selectedCategoryId,
-                            selectedImages,
-                            this
+                            token = token,
+                            productId = existingProduct!!.id,
+                            name = name,
+                            desc = desc,
+                            price = price,
+                            stock = stock,
+                            catId = selectedCategoryId,
+                            discount = discountText,
+                            uris = selectedImages,
+                            deletedUrls = deletedExistingUrls, // Send the tracked deletions!
+                            context = this
                         )
                     } else {
                         viewModel.uploadProduct(
-                            token,
-                            name,
-                            desc,
-                            price,
-                            stock,
-                            selectedCategoryId,
-                            discountText,
-                            selectedImages,
-                            this
+                            token = token,
+                            name = name,
+                            desc = desc,
+                            price = price,
+                            stock = stock,
+                            catId = selectedCategoryId,
+                            discount = discountText,
+                            uris = selectedImages,
+                            context = this
                         )
                     }
                 }
@@ -147,9 +179,17 @@ class UploadProductActivity : BaseActivity() {
 
     private fun setupImageRecycler() {
         imageAdapter = ImagePickerAdapter(onRemoveClick = { position ->
+            val uriToRemove = selectedImages[position]
+
+            // If user removes a web image, track it for deletion on the backend
+            if (uriToRemove.scheme?.startsWith("http") == true) {
+                deletedExistingUrls.add(uriToRemove.toString())
+            }
+
             selectedImages.removeAt(position)
             imageAdapter.submitList(ArrayList(selectedImages))
         }, onAddClick = { pickImagesLauncher.launch("image/*") })
+
         binding.rvImages.apply {
             layoutManager = LinearLayoutManager(
                 this@UploadProductActivity, LinearLayoutManager.HORIZONTAL, false
@@ -171,7 +211,6 @@ class UploadProductActivity : BaseActivity() {
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         binding.toolbar.setNavigationOnClickListener { finish() }
     }
-
 
     private fun showToast(msg: String) = Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
 }

@@ -10,8 +10,10 @@ import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.lifecycleScope
 import androidx.lifecycle.repeatOnLifecycle
 import com.example.varushopretailer.R
+import com.example.varushopretailer.activity.LanguageSelectionActivity
 import com.example.varushopretailer.activity.LoginActivity
 import com.example.varushopretailer.activity.RegisterActivity
+import com.example.varushopretailer.activity.SplashActivity
 import kotlinx.coroutines.launch
 import java.util.Locale
 
@@ -49,7 +51,7 @@ open class BaseActivity : AppCompatActivity() {
     }
 
     private fun isPublicPage(): Boolean {
-        return this is LoginActivity || this is RegisterActivity
+        return this is LoginActivity || this is RegisterActivity || this is SplashActivity || this is LanguageSelectionActivity
     }
 
     override fun attachBaseContext(newBase: Context) {

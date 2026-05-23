@@ -1,5 +1,7 @@
 package com.example.varushopretailer.fragments
 
+
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
@@ -8,7 +10,11 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
+import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
+import androidx.core.content.ContextCompat
 import androidx.core.widget.addTextChangedListener
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
@@ -26,7 +32,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-
+import androidx.core.net.toUri
 
 @AndroidEntryPoint
 class ManageProductsFragment : Fragment() {
@@ -64,8 +70,10 @@ class ManageProductsFragment : Fragment() {
         setupSwipeRefresh()
         observeViewModel()
         fetchProducts(isInitial = true)
+
         binding.fabUpload.setOnClickListener {
-            startActivity(Intent(requireContext(), UploadProductActivity::class.java))
+            val intent = Intent(requireContext(), UploadProductActivity::class.java)
+            editProductLauncher.launch(intent)
             binding.fabUpload.addSquishAnimation()
         }
     }
@@ -105,6 +113,15 @@ class ManageProductsFragment : Fragment() {
             updateUiVisibility(data)
         }
 
+
+        viewModel.deleteSuccess.observe(viewLifecycleOwner) { success ->
+            if (success) {
+                Toast.makeText(requireContext(), "Product deleted", Toast.LENGTH_SHORT).show()
+                fetchProducts(isInitial = false)
+            }
+        }
+
+
         binding.btnRetry.setOnClickListener { fetchProducts(isInitial = true) }
     }
 
@@ -138,18 +155,95 @@ class ManageProductsFragment : Fragment() {
     }
 
     private fun setupRecyclerView() {
-        productAdapter = ProductAdapter(isEditable = true) { product ->
+        productAdapter = ProductAdapter(isEditable = true, onItemClick = { product ->
             val intent = Intent(requireContext(), UploadProductActivity::class.java).apply {
                 putExtra("PRODUCT_DATA", product)
             }
             editProductLauncher.launch(intent)
-        }
+        }, onEmailClick = { product ->
+            emailAdminForDeletedProduct(product)
+        }, onDeleteClick = { product ->
+            showDeleteConfirmationDialog(product)
+        })
 
         binding.rvProducts.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = productAdapter
             setHasFixedSize(true)
         }
+    }
+
+    @SuppressLint("QueryPermissionsNeeded")
+    private fun emailAdminForDeletedProduct(product: Product) {
+        val adminEmail = "admin@varushop.com" // Replace with actual admin email
+        val subject = "Regarding Deleted Product: ${product.name} (ID: ${product.id})"
+        val body = """
+            Hello Admin,
+
+            I am reaching out regarding my product that was removed from the store.
+
+            Product Details:
+            Name: ${product.name}
+            ID: ${product.id}
+
+            Could you please clarify why this was deleted?
+
+            Thank you.
+        """.trimIndent()
+
+        val intent = Intent(Intent.ACTION_SENDTO).apply {
+            data = "mailto:".toUri()
+            putExtra(Intent.EXTRA_EMAIL, arrayOf(adminEmail))
+            putExtra(Intent.EXTRA_SUBJECT, subject)
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+
+        try {
+            startActivity(intent)
+        } catch (e: Exception) {
+            Toast.makeText(
+                requireContext(), "No email app found on this device.", Toast.LENGTH_SHORT
+            ).show()
+        }
+    }
+
+    private fun showDeleteConfirmationDialog(product: Product) {
+        val input = EditText(requireContext()).apply {
+            hint = "Enter ID: ${product.id}"
+            inputType = android.text.InputType.TYPE_CLASS_NUMBER
+            val padding = (16 * resources.displayMetrics.density).toInt()
+            setPadding(padding, padding, padding, padding)
+        }
+
+        AlertDialog.Builder(requireContext()).setTitle("Permanently Delete Product")
+            .setMessage("This action cannot be undone. To confirm, please type the product ID (${product.id}):")
+            .setView(input)
+            .setPositiveButton("Delete", null) // Set null initially to prevent auto-dismissal
+            .setNegativeButton("Cancel") { dialog, _ -> dialog.dismiss() }.create().apply {
+                setOnShowListener { dialog ->
+                    val btnPositive = (dialog as AlertDialog).getButton(AlertDialog.BUTTON_POSITIVE)
+                    btnPositive.setTextColor(
+                        ContextCompat.getColor(
+                            requireContext(), R.color.status_red_text
+                        )
+                    ) // Make text red
+
+                    btnPositive.setOnClickListener {
+                        val typedId = input.text.toString().trim()
+
+                        if (typedId == product.id.toString()) {
+                            val token = prefManager.getToken()
+                            if (token != null) {
+                                viewModel.permanentlyDeleteProduct(token, product.id)
+                            }
+                            dialog.dismiss()
+                        } else {
+                            input.error = "ID does not match"
+                        }
+                    }
+                }
+                show()
+            }
     }
 
     private fun setupFilters() {
