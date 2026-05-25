@@ -10,8 +10,10 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.varushopretailer.adapter.OrderProductsAdapter
 import com.example.varushopretailer.databinding.FragmentOrderDetailBottomSheetBinding
 import com.example.varushopretailer.helper.LangPrefManager
+import com.example.varushopretailer.modal.order.OrderProduct
 import com.example.varushopretailer.viewmodal.OrdersViewModel
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import dagger.hilt.android.AndroidEntryPoint
 
 @AndroidEntryPoint
@@ -45,11 +47,25 @@ class OrderDetailBottomSheetFragment : BottomSheetDialogFragment() {
     }
 
     private fun setupRecyclerView() {
-        productsAdapter = OrderProductsAdapter()
+        // 🔥 PASS THE CALLBACK HERE
+        productsAdapter = OrderProductsAdapter { product ->
+            showCancelItemConfirmation(product)
+        }
+
         binding.rvSheetProducts.apply {
             layoutManager = LinearLayoutManager(requireContext())
             adapter = productsAdapter
         }
+    }
+
+    // 🔥 Show Confirmation Dialog before cancelling a specific item
+    private fun showCancelItemConfirmation(product: OrderProduct) {
+        MaterialAlertDialogBuilder(requireContext()).setTitle("Cancel Item?")
+            .setMessage("Are you sure you want to cancel '${product.name}'? Stock will be restored and this cannot be undone.")
+            .setPositiveButton("Yes, Cancel") { _, _ ->
+                val token = LangPrefManager(requireContext()).getToken() ?: return@setPositiveButton
+                viewModel.cancelSingleItem(token, currentOrderId, product.product_id)
+            }.setNegativeButton("No", null).show()
     }
 
     @SuppressLint("SetTextI18n", "DefaultLocale")
@@ -83,16 +99,20 @@ class OrderDetailBottomSheetFragment : BottomSheetDialogFragment() {
             }
             binding.tvSheetCustomerAddress.text = fullAddressText
 
+            val currentStatus = detail.status.uppercase()
+
+            // 🔥 RESTRICTION: Only allow item cancellation if the order is still "ORDERED"
+            val canCancelItems = currentStatus == "ORDERED"
+            productsAdapter.canCancelItems = canCancelItems
+
             productsAdapter.submitList(detail.products)
-            setupActionButtons(detail.status.uppercase())
+            setupActionButtons(currentStatus)
         }
     }
-
 
     @SuppressLint("SetTextI18n")
     private fun setupActionButtons(currentStatus: String) {
         binding.btnUpdateStatus.visibility = View.GONE
-        binding.btnCancelOrder.visibility = View.GONE
         binding.tvStatusMessage.visibility = View.GONE
 
         when (currentStatus) {
@@ -101,8 +121,7 @@ class OrderDetailBottomSheetFragment : BottomSheetDialogFragment() {
                 binding.btnUpdateStatus.visibility = View.VISIBLE
                 binding.btnUpdateStatus.setOnClickListener { updateStatus("CONFIRMED") }
 
-                binding.btnCancelOrder.visibility = View.VISIBLE
-                binding.btnCancelOrder.setOnClickListener { updateStatus("CANCELLED") }
+
             }
 
             "CONFIRMED" -> {

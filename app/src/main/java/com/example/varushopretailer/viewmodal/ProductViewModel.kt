@@ -8,6 +8,7 @@ import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
 import com.example.varushopretailer.modal.ApiResponse
 import com.example.varushopretailer.modal.Category
+import com.example.varushopretailer.modal.UploadProductData
 import com.example.varushopretailer.stats.Resource
 import com.example.varushopretailer.stats.RetailerRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -120,8 +121,7 @@ class ProductViewModel @Inject constructor(
                 name, desc, price, stock, catId, discount, imageFiles
             )) {
                 is Resource.Success -> {
-                    // Add .body() right here! 👇
-                    val apiResponse: ApiResponse<String>? = result.data?.body()
+                    val apiResponse: ApiResponse<UploadProductData>? = result.data?.body()
 
                     if (apiResponse != null) {
                         _message.value = apiResponse.message
@@ -131,11 +131,8 @@ class ProductViewModel @Inject constructor(
                         } else {
                             _error.value = true
                         }
-                    } else {
-                        // Fallback if body is null (e.g., HTTP 500 or 404)
-                        _message.value = result.data?.message() ?: "Unknown error occurred"
-                        _error.value = true
                     }
+
                 }
 
                 is Resource.Error -> {

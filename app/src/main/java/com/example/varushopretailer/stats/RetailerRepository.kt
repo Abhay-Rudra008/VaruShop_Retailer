@@ -2,6 +2,7 @@ package com.example.varushopretailer.stats
 
 
 import com.example.varushopretailer.modal.ApiResponse
+import com.example.varushopretailer.modal.UploadProductData
 import com.example.varushopretailer.modal.wallet.WithdrawRequest
 import com.example.varushopretailer.viewmodal.BaseRepository
 import com.google.gson.Gson
@@ -9,6 +10,7 @@ import okhttp3.MediaType.Companion.toMediaTypeOrNull
 import okhttp3.MultipartBody
 import okhttp3.RequestBody.Companion.asRequestBody
 import okhttp3.RequestBody.Companion.toRequestBody
+import retrofit2.Response
 import java.io.File
 import javax.inject.Inject
 
@@ -98,10 +100,12 @@ class RetailerRepository @Inject constructor(
         }
 
     suspend fun updateOrderStatus(orderId: Int, status: String) = safeApiCall {
-        val body = mapOf("status" to status)
+        apiService.updateOrderStatus(orderId, mapOf("status" to status))
+    }
 
-
-        apiService.updateOrderStatus(orderId, body)
+    // 🔥 NEW
+    suspend fun cancelOrderItem(orderId: Int, productId: Int) = safeApiCall {
+        apiService.cancelOrderItem(orderId, mapOf("productId" to productId))
     }
 
     suspend fun getProductImages(productId: Int): Resource<ApiResponse<List<String>>> {
@@ -134,7 +138,7 @@ class RetailerRepository @Inject constructor(
         catId: Int,
         discount: String,
         files: List<File>
-    ) = safeApiCall {
+    ): Resource<Response<ApiResponse<UploadProductData>>> = safeApiCall { // <-- Added explicit return type
         val imageParts = files.map { file ->
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             MultipartBody.Part.createFormData("images", file.name, requestFile)
@@ -161,7 +165,7 @@ class RetailerRepository @Inject constructor(
         files: List<File>,
         deletedUrls: List<String>,
         discount: String = "0"
-    ) = safeApiCall {
+    ): Resource<Response<ApiResponse<String>>> = safeApiCall { // <-- Added explicit return type
         val imageParts = files.map { file ->
             val requestFile = file.asRequestBody("image/*".toMediaTypeOrNull())
             MultipartBody.Part.createFormData("images", file.name, requestFile)
@@ -178,7 +182,8 @@ class RetailerRepository @Inject constructor(
             categoryId = catId.toString().toRequestBody("text/plain".toMediaTypeOrNull()),
             discount = discount.toRequestBody("text/plain".toMediaTypeOrNull()),
             deletedImageUrls = deletedUrlsJson.toRequestBody("application/json".toMediaTypeOrNull()),
-            images = imageParts.ifEmpty { null })
+            images = imageParts.ifEmpty { null }
+        )
     }
     suspend fun deleteProduct(productId: Int) = safeApiCall {
         apiService.deleteProduct(productId)

@@ -8,5 +8,6 @@ data class Order(
     val total_amount: Double,
     val created_at: String,
     val address: String,
-    val payment_status: String
+    val payment_status: String,
+    val customer_name: String?
 )

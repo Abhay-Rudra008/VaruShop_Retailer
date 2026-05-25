@@ -42,7 +42,8 @@ class OrdersAdapter(private val onItemClick: (Order) -> Unit) :
 
         @SuppressLint("DefaultLocale", "SetTextI18n")
         fun bind(order: Order) {
-            binding.tvOrderId.text = "#ORD-${order.order_id}"
+            // 🔥 2. Show the Retailer Box ID (order.id) so it matches the Bottom Sheet
+            binding.tvOrderId.text = "#ORD-${order.id}"
 
             val amount = order.total_amount ?: 0.0
             binding.tvOrderAmount.text = "₹${String.format("%,.2f", amount)}"
@@ -54,11 +55,13 @@ class OrdersAdapter(private val onItemClick: (Order) -> Unit) :
                 rawDate
             }
 
-            if (order.address.isNullOrEmpty()) {
+            // 🔥 3. Use the actual customer_name instead of the address
+            val customerName = order.customer_name
+            if (customerName.isNullOrEmpty()) {
                 binding.tvCustomerName.visibility = View.GONE
             } else {
                 binding.tvCustomerName.visibility = View.VISIBLE
-                binding.tvCustomerName.text = order.address
+                binding.tvCustomerName.text = customerName
                 binding.tvCustomerName.isSelected = true
             }
 
@@ -86,7 +89,8 @@ class OrdersAdapter(private val onItemClick: (Order) -> Unit) :
 
     class DiffCallback : DiffUtil.ItemCallback<Order>() {
         override fun areItemsTheSame(oldItem: Order, newItem: Order): Boolean {
-            return oldItem.order_id == newItem.order_id
+            // 🔥 4. CRITICAL: Compare the Retailer Box ID (id), NOT the Parent ID!
+            return oldItem.id == newItem.id
         }
 
         override fun areContentsTheSame(oldItem: Order, newItem: Order): Boolean {

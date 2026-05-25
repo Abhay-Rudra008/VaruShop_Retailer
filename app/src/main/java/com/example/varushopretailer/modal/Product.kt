@@ -31,6 +31,6 @@ data class Product(
     val finalPrice: Double
         get() = if (discountValue > 0) priceValue * (1 - (discountValue / 100)) else priceValue
     val isAdminDeleted: Boolean get() = deletedAt != null
-    val isLowStock: Boolean get() = stock in 1..9
+    val isLowStock: Boolean get() = stock in 1..5
     val isOutOfStock: Boolean get() = stock <= 0
 }

@@ -52,7 +52,23 @@ class OrdersViewModel @Inject constructor(
             }
         }
     }
+    fun cancelSingleItem(token: String, orderId: Int, productId: Int) {
+        _isDetailLoading.value = true
 
+        viewModelScope.launch {
+            when (val result = repository.cancelOrderItem(orderId, productId)) {
+                is Resource.Success -> {
+                    _message.value = "Item cancelled successfully"
+                    loadOrderDetail(token, orderId)
+                }
+                is Resource.Error -> {
+                    _message.value = result.message
+                    _isDetailLoading.value = false
+                }
+                is Resource.Loading -> { }
+            }
+        }
+    }
     fun loadOrderDetail(token: String, orderId: Int) {
         _isDetailLoading.value = true
 

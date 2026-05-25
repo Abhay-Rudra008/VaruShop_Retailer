@@ -10,6 +10,7 @@ import com.example.varushopretailer.modal.LowStockProduct
 import com.example.varushopretailer.modal.MonthlyRevenue
 import com.example.varushopretailer.modal.Order
 import com.example.varushopretailer.modal.Product
+import com.example.varushopretailer.modal.UploadProductData
 import com.example.varushopretailer.modal.User
 import com.example.varushopretailer.modal.order.OrderDetailData
 import com.example.varushopretailer.modal.wallet.PayoutData
@@ -95,6 +96,15 @@ interface RetailerApiService {
     @GET("retailer/orders/recent")
     suspend fun getRecentOrders(): ApiResponse<List<Order>>
 
+    @PUT("retailer/orders/{orderId}/status")
+    suspend fun updateOrderStatus(
+        @Path("orderId") orderId: Int, @Body body: Map<String, String>
+    ): ApiResponse<Unit>
+
+    @PUT("retailer/orders/{orderId}/cancel-item")
+    suspend fun cancelOrderItem(
+        @Path("orderId") orderId: Int, @Body body: Map<String, Int>
+    ): ApiResponse<Unit>
 
     @GET("retailer/products")
     suspend fun getMyProducts(
@@ -111,7 +121,7 @@ interface RetailerApiService {
     ): Response<ApiResponse<List<String>>>
 
     @Multipart
-    @POST("retailer/products/upload")
+    @POST("retailer/products")
     suspend fun uploadProduct(
         @Part("name") name: RequestBody,
         @Part("description") description: RequestBody?,
@@ -120,7 +130,7 @@ interface RetailerApiService {
         @Part("category_id") categoryId: RequestBody,
         @Part("discount_percent") discount: RequestBody?,
         @Part images: List<MultipartBody.Part>
-    ): Response<ApiResponse<String>>
+    ): Response<ApiResponse<UploadProductData>>
 
     @Multipart
     @PUT("retailer/products/{id}")
@@ -136,11 +146,6 @@ interface RetailerApiService {
         @Part images: List<MultipartBody.Part>?
     ): Response<ApiResponse<String>>
 
-    @PUT("retailer/orders/{id}/status")
-    suspend fun updateOrderStatus(
-
-        @Path("id") orderId: Int, @Body statusMap: Map<String, String>
-    ): ApiResponse<Unit>
 
     @GET("retailer/payouts")
     suspend fun getPayoutDashboard(): ApiResponse<PayoutData>
@@ -150,7 +155,8 @@ interface RetailerApiService {
         @Body request: WithdrawRequest
     ): ApiResponse<Unit>
 
-    @DELETE("retailer/products/delete/{id}")git init
+    @DELETE("retailer/products/delete/{id}")
+
     suspend fun deleteProduct(
         @Path("id") productId: Int
     ): ApiResponse<Unit>

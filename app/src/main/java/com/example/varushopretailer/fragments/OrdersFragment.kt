@@ -119,7 +119,7 @@ class OrdersFragment : Fragment() {
 
     private fun setupRecyclerView() {
         ordersAdapter = OrdersAdapter { clickedOrder ->
-            val bottomSheet = OrderDetailBottomSheetFragment.newInstance(clickedOrder.order_id)
+            val bottomSheet = OrderDetailBottomSheetFragment.newInstance(clickedOrder.id)
             bottomSheet.show(childFragmentManager, "OrderDetailSheet")
         }
 

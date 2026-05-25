@@ -100,7 +100,6 @@ class UploadProductActivity : BaseActivity() {
             }
         }
 
-        // Listen for the background images to load
         viewModel.productImages.observe(this) { imagesList ->
             if (imagesList.isNotEmpty()) {
                 loadImagesIntoAdapter(imagesList)
@@ -119,7 +118,10 @@ class UploadProductActivity : BaseActivity() {
         }
 
         viewModel.message.observe(this) { msg ->
-            if (!msg.isNullOrEmpty()) Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+            if (!msg.isNullOrEmpty()) {
+                Toast.makeText(this, msg, Toast.LENGTH_SHORT).show()
+                viewModel.clearMessage()
+            }
         }
 
         viewModel.uploadSuccess.observe(this) { success ->
